@@ -259,3 +259,63 @@ def create_lookahead_optimizer(
         k=lookahead_k,
         pullback_momentum=pullback_momentum
     )
+
+
+def LookaheadAdam(
+    parameters,
+    lr: float = 1e-3,
+    betas: tuple = (0.9, 0.999),
+    eps: float = 1e-8,
+    weight_decay: float = 0,
+    alpha: float = 0.5,
+    k: int = 6,
+    pullback_momentum: str = "none"
+) -> Lookahead:
+    """Create Lookahead optimizer with Adam base."""
+    from torch.optim import Adam
+    base_optimizer = Adam(
+        parameters, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay
+    )
+    return Lookahead(base_optimizer, alpha=alpha, k=k, pullback_momentum=pullback_momentum)
+
+
+def LookaheadSGD(
+    parameters,
+    lr: float = 1e-3,
+    momentum: float = 0,
+    dampening: float = 0,
+    weight_decay: float = 0,
+    nesterov: bool = False,
+    alpha: float = 0.5,
+    k: int = 6,
+    pullback_momentum: str = "pullback"
+) -> Lookahead:
+    """Create Lookahead optimizer with SGD base."""
+    from torch.optim import SGD
+    base_optimizer = SGD(
+        parameters, lr=lr, momentum=momentum, dampening=dampening,
+        weight_decay=weight_decay, nesterov=nesterov
+    )
+    return Lookahead(base_optimizer, alpha=alpha, k=k, pullback_momentum=pullback_momentum)
+
+
+def LookaheadRAdam(
+    parameters,
+    lr: float = 1e-3,
+    betas: tuple = (0.9, 0.999),
+    eps: float = 1e-8,
+    weight_decay: float = 0,
+    alpha: float = 0.5,
+    k: int = 6,
+    pullback_momentum: str = "none"
+) -> Lookahead:
+    """Create Lookahead optimizer with RAdam base."""
+    try:
+        from torch.optim import RAdam
+    except ImportError:
+        raise ImportError("RAdam is not available in this PyTorch version")
+    
+    base_optimizer = RAdam(
+        parameters, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay
+    )
+    return Lookahead(base_optimizer, alpha=alpha, k=k, pullback_momentum=pullback_momentum)
