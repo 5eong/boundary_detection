@@ -7,9 +7,9 @@ from torch.utils.data import DataLoader
 import segmentation_models_pytorch as smp
 import pytorch_lightning as pl
 
-from ..optimizers.lookahead import Lookahead
-from ..metrics.metrics import pixelwise_f1, mean_iou, mcc
-from ..losses import loss_functions as loss
+from optimizers.lookahead import Lookahead
+from metrics.metrics import pixelwise_f1, mean_iou, mcc
+from losses import loss_functions as loss
 
 
 loss_registry = {

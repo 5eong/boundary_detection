@@ -1,0 +1,23 @@
+context:
+  arch: unetplusplus
+  batch_size: 16
+  encoder: resnet50
+  encoder_weights: imagenet
+  in_channels: 9
+  learning_rate: 0.01
+  loss_1: DiceLoss
+  loss_2: ComboLoss
+  loss_3: BCELoss
+  out_channels: 3
+  params_1: {}
+  params_2: {}
+  params_3: {}
+  weight_1: 0.8
+  weight_2: 0.0
+  weight_3: 0.8
+test_dataset: !!python/object:__main__.DemoDataset
+  size: 20
+train_dataset: !!python/object:__main__.DemoDataset
+  size: 100
+val_dataset: !!python/object:__main__.DemoDataset
+  size: 20

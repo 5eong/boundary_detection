@@ -19,9 +19,6 @@ rasterio>=1.2.0
 netCDF4>=1.5.0
 gdal>=3.0.0
 
-# Medical image processing
-medpy>=0.4.0
-
 # Visualization and plotting
 matplotlib>=3.3.0
 

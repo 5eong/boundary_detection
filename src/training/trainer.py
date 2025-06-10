@@ -23,7 +23,6 @@ from torch.utils.data import DataLoader, random_split
 from data.datasets import AI4Boundaries, Euro_0512, MyanmarSatellite, SingleImage
 from models.segmentator import PLSegmentator
 from models.boundary_segmentator import PLSegmentator as BoundaryPLSegmentator
-from models.segformer import PLSegmentator as SegFormerPLSegmentator
 from utils.config import ConfigManager
 
 
@@ -299,7 +298,7 @@ class TrainingManager:
         
         return callbacks
     
-    def create_logger(self) -> Optional[pl.loggers.LightningLoggerBase]:
+    def create_logger(self) -> Optional[pl.loggers.Logger]:
         """
         Create training logger.
         

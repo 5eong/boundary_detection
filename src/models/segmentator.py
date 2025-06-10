@@ -34,6 +34,11 @@ def loss_function(name, **kwargs):
     loss_class = loss_registry.get(name)
     if not loss_class:
         raise ValueError(f"No such loss function: {name}")
+    
+    # Add default parameters for SMP losses
+    if name == "DiceLoss" and not kwargs:
+        kwargs = {"mode": "multilabel", "from_logits": True}
+    
     return loss_class(**kwargs)
 
 

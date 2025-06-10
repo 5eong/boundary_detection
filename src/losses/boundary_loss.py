@@ -20,7 +20,6 @@ from tqdm import tqdm
 from torch import einsum, Tensor
 from skimage.io import imsave
 from PIL import Image, ImageOps
-from medpy.metric.binary import hd
 from scipy.ndimage import distance_transform_edt as eucl_distance
 
 
@@ -205,62 +204,6 @@ def union_sum(a: Tensor, b: Tensor) -> Tensor:
     return einsum("bk...->bk", union(a, b).type(torch.float32))
 
 
-def hausdorff(preds: Tensor, target: Tensor, spacing: Tensor = None) -> Tensor:
-    """
-    Compute Hausdorff distance between predictions and targets.
-    
-    Args:
-        preds: Predicted segmentation masks
-        target: Ground truth segmentation masks
-        spacing: Voxel spacing for distance calculation
-        
-    Returns:
-        Hausdorff distances
-    """
-    assert preds.shape == target.shape
-    assert one_hot(preds)
-    assert one_hot(target)
-
-    B, K, *img_shape = preds.shape
-
-    if spacing is None:
-        D: int = len(img_shape)
-        spacing = torch.ones((B, D), dtype=torch.float32)
-
-    assert spacing.shape == (B, len(img_shape))
-
-    res = torch.zeros((B, K), dtype=torch.float32, device=preds.device)
-    n_pred = preds.cpu().numpy()
-    n_target = target.cpu().numpy()
-    n_spacing = spacing.cpu().numpy()
-
-    for b in range(B):
-        for k in range(K):
-            if not n_target[b, k].any():  # No object to predict
-                if n_pred[b, k].any():  # Predicted something nonetheless
-                    res[b, k] = sum(
-                        (dd * d)**2 for (dd, d) in zip(n_spacing[b], img_shape)
-                    ) ** 0.5
-                    continue
-                else:
-                    res[b, k] = 0
-                    continue
-            
-            if not n_pred[b, k].any():
-                if n_target[b, k].any():
-                    res[b, k] = sum(
-                        (dd * d)**2 for (dd, d) in zip(n_spacing[b], img_shape)
-                    ) ** 0.5
-                    continue
-                else:
-                    res[b, k] = 0
-                    continue
-
-            res[b, k] = hd(n_pred[b, k], n_target[b, k], voxelspacing=n_spacing[b])
-
-    return res
-
-
 # Representation conversions
 def probs2class(probs: Tensor) -> Tensor:
     """Convert probabilities to class indices."""
@@ -349,29 +292,6 @@ def one_hot2dist(
                 eucl_distance(negmask, sampling=resolution) * negmask -
                 (eucl_distance(posmask, sampling=resolution) - 1) * posmask
             )
-
-    return res
-
-
-def one_hot2hd_dist(
-    seg: np.ndarray, 
-    resolution: Tuple[float, float, float] = None,
-    dtype=None
-) -> np.ndarray:
-    """
-    Convert one-hot segmentation to Hausdorff distance transform.
-    
-    Used for boundary-aware loss functions.
-    Reference: https://arxiv.org/pdf/1904.10030.pdf
-    Implementation from: https://github.com/JunMa11/SegWithDistMap
-    """
-    K: int = len(seg)
-    res = np.zeros_like(seg, dtype=dtype)
-    
-    for k in range(K):
-        posmask = seg[k].astype(np.bool)
-        if posmask.any():
-            res[k] = eucl_distance(posmask, sampling=resolution)
 
     return res
 
